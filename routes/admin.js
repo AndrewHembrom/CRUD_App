@@ -1,7 +1,9 @@
 const { Router } = require('express');
 const adminMiddleware = require("../middleware/admin");
 const router = Router();
-const  { Admin, Course } = require("../db/index")
+const { Admin, Course } = require("../db/index")
+const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require('../config');
 
 
 router.post('/signup', async (req, res) => {
@@ -35,38 +37,54 @@ router.post('/signup', async (req, res) => {
     }
 });
 
+router.post('/signin', async (req, res) => {
+    const username = req.body.username;
+    const password = req.body.password;
+
+    const adminValidated = await Admin.find({
+        username,
+        password
+    })
+
+    if (adminValidated) {
+        const token = jwt.sign({
+            username
+        }, JWT_SECRET);
+
+        res.json({
+            token
+        })
+    } else {
+        res.status(411).json({
+            "msg": "Incorrect Username or password"
+        })
+    }
+});
+
 router.post('/courses', adminMiddleware, async (req, res) => {
-    const title = req.body.title;
-    const description = req.body.description;
-    const price = req.body.price;
-    const imageLink = req.body.imageLink;
+    const { title, description, price, imageLink } = req.body;
 
     try { 
-        const existingCourse = Course.findOne({
-            title,
-            description
-        });
+        const existingCourse = await Course.findOne({ title, description });
+        console.log(existingCourse);
         if (existingCourse) {
-            res.status(400).json({
-                "msg": "Course with this title already exists."
+            return res.status(400).json({
+                msg: "Course with this title already exists."
             });
         }
         
-        const newCourse = await Course.create({
-            title: title,
-            description: description,
-            price: price,
-            imageLink: imageLink
-        });
+        const newCourse = await Course.create({ title, description, price, imageLink });
+
         res.json({
-            "msg": "Course created successfully",
+            msg: "Course created successfully",
             courseId: newCourse._id
         });
     } catch (error) {
+        console.log(error);
         res.status(500).json({
-            "msg": "Error creating course",
+            msg: "Error creating course",
             error: error.message
-        })
+        });
     }
 });
 

@@ -1,9 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
-const adminRouter = require('./routes/admin');
-const userRouter = require('./routes/user');
-const JWT_SECRET = drew_courses 
+const adminRouter = require("./routes/admin")
+const userRouter = require("./routes/user")
 
 //Middlewares
 app.use(bodyParser.json());
@@ -15,5 +14,3 @@ const PORT = 3000;
 app.listen(PORT, () => { 
     console.log(`Server is running on port ${PORT}`);
 })
-
-module.exports = JWT_SECRET;
