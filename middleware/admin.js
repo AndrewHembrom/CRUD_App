@@ -2,8 +2,8 @@ const { Admin } = require("../db/index");
 
 // Middleware for handling auth
 function adminMiddleware(req, res, next) { 
-    const username = req.header.username;
-    const password = req.header.password;
+    const username = req.headers.username;
+    const password = req.headers.password;
     Admin.findOne({
         username: username,
         password: password,
